@@ -13,6 +13,17 @@ Streamlit 服务（`http://localhost:8501`）逐页抓取，页面上的每一�
 | `satisfaction_analysis.png` | Satisfaction Analysis | 满意度分布、类别 × 满意度热力图、各维度低满意度率、相关性表 |
 | `similar_tickets.png` | Similar Tickets | 相似工单对、相似问题簇、高频关键词 |
 
+## 细节放大图
+
+整页截图较宽，正文文字在 README 里会偏小。以下三张是对**最关键证据区**按 1.6 倍设备像素比
+单独裁切的放大图，嵌入 README 第 12 节，用于直接阅读文字内容：
+
+| 文件 | 裁切区域 | 为什么需要放大 |
+| --- | --- | --- |
+| `detail_manager_focus.png` | Overview 的「主管关注」区前两条信号 | 需要看清每条信号的**判断依据**与关联工单编号 |
+| `detail_anomaly_evidence.png` | Anomaly 页第 1 条信号卡（【高】高优先级未解决） | 需要看清 `priority=高 且 is_resolved=false`、`7/8`、`120 小时` 等判定细节 |
+| `detail_similar_clusters.png` | Similar 页「相似问题簇」表 | 需要看清 C01 / C02 两个簇的工单编号与代表描述 |
+
 ## 待补录：`development_process.png`
 
 **这张截图无法由程序代劳，需要开发者在自己机器上补录**（要求明确写了「不要伪造截图」）。

@@ -7,6 +7,21 @@
 
 ---
 
+## 快速预览
+
+<p align="center">
+  <a href="screenshots/dashboard_overview.png"><img src="screenshots/dashboard_overview.png" alt="SmartTicket Analytics Dashboard 首页" width="1000"></a>
+</p>
+
+<p align="center">
+  <sub>Dashboard 首页：核心 KPI（总工单 50 / 已解决 42 / 未解决 8 / 平均处理时长 19.69h / 平均满意度 2.36 / 异常信号 8）
+  与按严重程度分级的「主管关注」异常信号区。图为真实运行截图，可点击查看原图。</sub>
+</p>
+
+> 全部页面截图见文末 **[第 12 节 · 项目截图](#12-项目截图)**。
+
+---
+
 ## 1. 项目背景
 
 客服主管每天面对的是「一屏屏滚不完的工单列表」。他真正需要回答的问题只有三个：
@@ -257,13 +272,17 @@ SmartTicket-Analytics/
 │   └── test_anomaly_detection.py     # 异常逻辑、高优未解决、长时长识别、阈值可调
 │
 ├── screenshots/                      # 真实运行截图
-│   ├── dashboard_overview.png        # 首页 KPI + 主管关注区
+│   ├── dashboard_overview.png        # 首页 KPI + 主管关注区（整页）
 │   ├── trend_analysis.png            # 时间趋势页
 │   ├── anomaly_analysis.png          # 异常检测页
 │   ├── category_analysis.png         # 问题类型页
 │   ├── satisfaction_analysis.png     # 满意度页
 │   ├── similar_tickets.png           # 相似工单页
-│   └── development_process.png       # 开发过程截图（由开发者本机 IDE/终端补录，见 screenshots/README.md）
+│   ├── detail_manager_focus.png      # 细节放大：主管关注区
+│   ├── detail_anomaly_evidence.png   # 细节放大：单条信号的判断依据
+│   ├── detail_similar_clusters.png   # 细节放大：相似问题簇
+│   ├── README.md                     # 截图说明 + 开发过程截图补录清单
+│   └── development_process.png       # 开发过程截图（由开发者本机 IDE/终端补录）
 │
 ├── outputs/
 │   └── report.md                     # run_analysis.py 生成的完整分析报告
@@ -300,15 +319,102 @@ AI 工具主要用于：
 
 ## 12. 项目截图
 
-| 截图 | 文件 | 展示内容 |
-| --- | --- | --- |
-| 截图 1 · Dashboard 首页 | `screenshots/dashboard_overview.png` | 总工单 50 / 已解决 42 / 未解决 8 / 平均处理时长 19.69h / 平均满意度 2.36 / 异常信号 8，以及「主管关注」信息框 |
-| 截图 2 · 趋势分析 | `screenshots/trend_analysis.png` | 每日工单量折线、每日高优先级工单量、前后半段日均对比 |
-| 截图 3 · 异常检测 | `screenshots/anomaly_analysis.png` | 8 条异常信号（含判断依据）、高优先级未解决工单表、异常类型分布图 |
-| 截图 4 · 开发过程 | `screenshots/development_process.png` | IDE / 终端 / pytest / streamlit 运行过程（**需开发者本机补录，见下方说明**） |
-| 补充 · 问题类型 | `screenshots/category_analysis.png` | 各类别数量、处理时长、满意度与风险类别交叉 |
-| 补充 · 满意度 | `screenshots/satisfaction_analysis.png` | 满意度分布、类别 × 满意度热力图、低满意度明细 |
-| 补充 · 相似工单 | `screenshots/similar_tickets.png` | 相似工单对、相似问题簇、高频关键词 |
+以下 Dashboard 截图**全部为真实运行截图**：由 headless Chrome 访问本地正在运行的 Streamlit 服务
+（`http://localhost:8501`）逐页抓取，页面上的每一个数字都来自 `data/tickets.json` 的实时计算。
+
+> 说明：整页截图用于展示页面结构与信息层级；由于整页图较宽，正文会偏小，
+> 因此对**最关键的证据区**额外提供了 1.6 倍放大的细节图，方便直接阅读文字内容。
+
+### 截图 1 · Dashboard 首页（Overview）
+
+整页图见文首 **[快速预览](#快速预览)** ｜ 原图：[`screenshots/dashboard_overview.png`](screenshots/dashboard_overview.png)
+
+首屏包含 12 个 KPI：总工单数 **50**、已解决 **42**、未解决 **8**、平均处理时长 **19.69 h**、
+平均满意度 **2.36**、异常信号 **8**、未解决率 **16.0%**、中位处理时长 **7.0 h**、最长处理时长 **120.0 h**。
+
+**细节放大 · 「主管关注」异常信号区**（每条信号均带判断依据与关联工单）：
+
+<p align="center">
+  <a href="screenshots/detail_manager_focus.png"><img src="screenshots/detail_manager_focus.png" alt="主管关注区细节：异常信号与判断依据" width="1000"></a>
+</p>
+
+### 截图 2 · 趋势分析（Trend Analysis）
+
+<p align="center">
+  <a href="screenshots/trend_analysis.png"><img src="screenshots/trend_analysis.png" alt="趋势分析页：每日工单量与前后半段对比" width="1000"></a>
+</p>
+
+**看点**：每日工单量折线（2024-06-01 ~ 06-11，峰值 06-10 的 6 条）、每日高优先级工单量柱状图，
+以及「前后半段日均对比」表 —— 日均工单量由 **3.8 → 5.17 条/天（+36%）**，
+用日均折算避免了「两段时间天数不同」带来的假增长。
+
+### 截图 3 · 异常检测（Anomaly Detection）
+
+<p align="center">
+  <a href="screenshots/anomaly_analysis.png"><img src="screenshots/anomaly_analysis.png" alt="异常检测页：8 条异常信号与判断依据" width="1000"></a>
+</p>
+
+**看点**：本项目最核心的页面。8 条异常信号逐条展开，每条都给出 **evidence（判断依据）** 与关联工单；
+下方是高优先级未解决工单明细表与「异常类型 × 严重程度」堆叠图；
+页面顶部提供相似度阈值滑块，可实时调整「重复问题」信号的判定严格程度。
+
+**细节放大 · 单条信号的判断依据**（这是「结论必须可追溯」的直接体现）：
+
+<p align="center">
+  <a href="screenshots/detail_anomaly_evidence.png"><img src="screenshots/detail_anomaly_evidence.png" alt="单条异常信号细节：类型、描述、判断依据、关联工单" width="1000"></a>
+</p>
+
+### 截图 4 · 相似 / 重复问题（Similar Tickets）
+
+<p align="center">
+  <a href="screenshots/similar_tickets.png"><img src="screenshots/similar_tickets.png" alt="相似工单页：相似工单对与问题簇" width="1000"></a>
+</p>
+
+**看点**：TF-IDF + 余弦相似度的实际效果 —— 阈值 0.30 下命中 **6 组相似工单对、2 个问题簇**，
+并可看到 `ticket_a / ticket_b / similarity / 两条描述` 的完整明细。
+
+**细节放大 · 相似问题簇**（同一根因的批量工单）：
+
+<p align="center">
+  <a href="screenshots/detail_similar_clusters.png"><img src="screenshots/detail_similar_clusters.png" alt="相似问题簇细节：C01 五条订单状态异常、C02 两条重复扣款" width="1000"></a>
+</p>
+
+C01 簇把 5 条描述各异的工单（T008、T020、T028、T032、T035）识别为同一根因
+「付款成功但订单状态异常」，跨 7 天反复出现；C02 簇识别出 2 条重复扣款。
+
+### 其他页面 · 问题类型与满意度
+
+<table>
+  <tr>
+    <td width="50%">
+      <a href="screenshots/category_analysis.png"><img src="screenshots/category_analysis.png" alt="问题类型分析页" width="100%"></a><br>
+      <sub><b>Category Analysis</b>：各类别数量 / 占比 / 平均处理时长 / 平均满意度 / 未解决数，
+      并交叉筛选出「数量多 + 处理慢 + 满意度低」的类别。</sub>
+    </td>
+    <td width="50%">
+      <a href="screenshots/satisfaction_analysis.png"><img src="screenshots/satisfaction_analysis.png" alt="满意度分析页" width="100%"></a><br>
+      <sub><b>Satisfaction Analysis</b>：满意度分布、类别 × 满意度热力图、各维度低满意度率，
+      以及 Spearman 相关性表（只描述相关，不做因果推断）。</sub>
+    </td>
+  </tr>
+</table>
+
+### 截图 5 · 开发过程（待补录）
+
+`development_process.png` **需要开发者在本机补录**（测评要求明确「不要伪造截图」，
+本机 IDE / 终端画面无法由程序代劳）。建议按下面顺序在同一台机器上一次截完：
+
+```bash
+.venv\Scripts\activate          # ① 终端：虚拟环境
+pytest -q                       # ② 终端：41 passed
+python run_analysis.py          # ③ 终端：主管摘要输出
+streamlit run app.py            # ④ 终端：Local URL: http://localhost:8501
+```
+
+画面建议覆盖 2~3 个：**IDE 窗口**（`src/anomaly_detection.py` 等模块代码）、
+**终端**（pytest 通过输出）、**AI 辅助工具窗口**（讨论分析维度 / 异常阈值的过程）、
+**浏览器**（Streamlit 运行中，地址栏可见 `localhost:8501`）。
+详细清单见 [`screenshots/README.md`](screenshots/README.md)。
 
 ---
 
