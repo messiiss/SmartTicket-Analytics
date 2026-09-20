@@ -1,0 +1,31 @@
+# 虚拟环境
+.venv/
+venv/
+env/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*.pyc
+
+# 测试与工具缓存
+.pytest_cache/
+.streamlit/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# 环境变量与密钥（切勿提交）
+.env
+.env.*
+*.key
+
+# 分析产物：报告需要提交（是交付物之一），运行日志不提交
+outputs/*.log
+
+# 系统 / 编辑器文件
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

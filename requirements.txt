@@ -1,0 +1,12 @@
+# SmartTicket Analytics 运行依赖
+# 安装：pip install -r requirements.txt
+#
+# 说明：本项目刻意不引入 LangChain / RAG / 向量库 / 数据库 / Docker。
+# 数据规模约 50 条结构化工单，核心任务是趋势与异常分析，不是知识库问答。
+
+pandas>=2.1,<3.0
+numpy>=1.26,<3.0
+plotly>=5.18
+streamlit>=1.50
+scikit-learn>=1.4
+pytest>=8.0
