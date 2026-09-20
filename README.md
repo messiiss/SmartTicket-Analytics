@@ -7,9 +7,6 @@
 | **GitHub 仓库** | <https://github.com/messiiss/SmartTicket-Analytics> |
 | **在线演示（已部署）** | <http://134.185.89.68:8501> |
 
-> 在线演示由 Docker 部署在云服务器上（Oracle Linux 9.7 / aarch64），容器健康检查通过，
-> 打开即可交互查看全部 8 个页面，无需本地安装任何环境。
-
 > 本项目的所有指标、趋势与异常结论，均由程序基于 `data/tickets.json` **实时计算**得出，
 > 不存在任何硬编码结果或编造数据。可复现：`python run_analysis.py`。
 
@@ -296,8 +293,6 @@ curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8501/_stcore/health   
 
 **运维备忘**（实测记录）：
 
-- 该服务器上同时运行着 14 个其它容器（代理 / Supabase / MinIO 等），本项目使用独立的容器名与
-  独立的 compose network，**未改动任何既有容器**；
 - 8501 端口在部署前未被占用，部署后由 `docker-proxy` 监听 `0.0.0.0:8501`；
 - 若需更新版本：`git pull && docker compose up -d --build`；
 - 若需查看实时日志：`docker logs -f smartticket-analytics`。
@@ -508,9 +503,6 @@ $ curl -s -o /dev/null -w '%{http_code}\n' http://134.185.89.68:8501/_stcore/hea
   <a href="screenshots/development_ai_chat.png"><img src="screenshots/development_ai_chat.png" alt="开发过程：AI 协作记录" width="1000"></a>
 </p>
 
-> 说明：以上两张为开发者实际开发过程中的记录。若需要更完整的「IDE + 终端」画面，
-> 可补充截取 `pytest -q` 与 `streamlit run app.py` 的终端输出，具体清单见
-> [`screenshots/README.md`](screenshots/README.md)。
 
 ---
 
@@ -538,47 +530,3 @@ $ curl -s -o /dev/null -w '%{http_code}\n' http://134.185.89.68:8501/_stcore/hea
 
 ---
 
-## 14. Git 与交付
-
-### 14.1 仓库信息
-
-| 项目 | 值 |
-| --- | --- |
-| 远程仓库 | <https://github.com/messiiss/SmartTicket-Analytics> |
-| 主分支 | `main`（已配置 upstream 跟踪） |
-| Git 历史 | 10 个提交，按「初始化 → 数据层 → 指标层 → 异常层 → Dashboard → 测试 → 文档 → 容器化」顺序组织 |
-
-### 14.2 提交记录
-
-```text
-docs: add docker deployment and online demo links     # 更新 README 线上地址与部署说明
-docs: embed dashboard screenshots and detail crops in README
-chore: add CLI pipeline entry and generated analysis report
-docs: add project README and dashboard screenshots
-test: add analysis tests
-feat: add streamlit dashboard
-feat: add anomaly detection and TF-IDF similar ticket analysis
-feat: add multi-dimension metrics, trend analysis and report generator
-feat: add ticket data loading and cleaning with quality checks
-feat: initialize smart ticket analytics project
-```
-
-### 14.3 常用命令
-
-```bash
-git clone https://github.com/messiiss/SmartTicket-Analytics.git   # 克隆
-git add .
-git commit -m "feat: xxx"
-git push                                                          # 推送到 main
-```
-
-`.gitignore` 已排除 `.venv/`、`__pycache__/`、`.pytest_cache/`、`.streamlit/`、`*.pyc`、`.env`、`.DS_Store`。
-`.dockerignore` 另外排除了 `.git/`、截图、文档等，保证镜像里只有运行必需的内容。
-
-> 安全说明：仓库中**不含任何密钥**。`.env`、`*.key`、`*.pem` 均在两个 ignore 文件中被排除，
-> 可执行 `git ls-files | grep -E "\.env|\.key|\.pem"` 确认结果为空。
-
----
-
-*本项目为 AI 测评任务（0111 · 客服工单趋势分析）的交付物。*
-*在线演示：<http://134.185.89.68:8501>　|　代码仓库：<https://github.com/messiiss/SmartTicket-Analytics>*
