@@ -1,0 +1,33 @@
+# 构建上下文排除项：只把运行必需的文件送进镜像
+.git/
+.gitignore
+.venv/
+venv/
+
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.streamlit/
+.coverage
+
+# 文档、截图、报告都不需要进镜像（README 在 GitHub 上看，不需要进容器）
+README.md
+Dockerfile
+.dockerignore
+docker-compose.yml
+screenshots/
+outputs/
+
+tests/
+
+# 本地环境与密钥
+.env
+.env.*
+*.key
+*.pem
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

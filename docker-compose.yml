@@ -1,0 +1,35 @@
+# SmartTicket Analytics 一键部署
+#
+# 用法：
+#   docker compose up -d --build      # 构建并后台启动
+#   docker compose logs -f            # 查看日志
+#   docker compose down               # 停止并移除容器
+#
+# 说明：使用 IMAGE_TAG 便于回滚到上一个可用镜像。
+
+services:
+  smartticket:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: smartticket-analytics:${IMAGE_TAG:-1.0.0}
+    container_name: smartticket-analytics
+    ports:
+      - "8501:8501"
+    environment:
+      TZ: Asia/Shanghai
+      STREAMLIT_SERVER_PORT: "8501"
+      STREAMLIT_SERVER_ADDRESS: 0.0.0.0
+      STREAMLIT_SERVER_HEADLESS: "true"
+      STREAMLIT_BROWSER_GATHER_USAGE_STATS: "false"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8501/_stcore/health', timeout=4).status==200 else 1)"
+      interval: 30s
+      timeout: 5s
+      start_period: 20s
+      retries: 3

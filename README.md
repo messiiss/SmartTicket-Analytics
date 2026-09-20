@@ -2,6 +2,14 @@
 
 **客服工单趋势与异常分析平台**　·　基于 50 条真实客服工单数据的数据分析与异常发现项目
 
+| 交付入口 | 地址 |
+| --- | --- |
+| **GitHub 仓库** | <https://github.com/messiiss/SmartTicket-Analytics> |
+| **在线演示（已部署）** | <http://134.185.89.68:8501> |
+
+> 在线演示由 Docker 部署在云服务器上（Oracle Linux 9.7 / aarch64），容器健康检查通过，
+> 打开即可交互查看全部 8 个页面，无需本地安装任何环境。
+
 > 本项目的所有指标、趋势与异常结论，均由程序基于 `data/tickets.json` **实时计算**得出，
 > 不存在任何硬编码结果或编造数据。可复现：`python run_analysis.py`。
 
@@ -202,7 +210,9 @@
 
 ---
 
-## 8. 项目运行
+## 8. 项目运行与部署
+
+### 8.1 本地运行
 
 ```bash
 # 1. 创建虚拟环境
@@ -217,7 +227,7 @@ source .venv/bin/activate
 # 3. 安装依赖
 pip install -r requirements.txt
 
-# 4. 启动 Dashboard（自动打开 http://localhost:8501）
+# 4. 启动 Dashboard（默认 http://localhost:8501）
 streamlit run app.py
 
 # 5.（可选）命令行跑完整分析，输出 Markdown 报告
@@ -226,6 +236,71 @@ python run_analysis.py --threshold 0.35 --out outputs/report.md   # 自定义相
 ```
 
 Dashboard 支持通过 URL 直接打开指定页面：`http://localhost:8501/?page=Anomaly%20Detection`
+
+### 8.2 Docker 运行（推荐用于交付 / 演示）
+
+不需要在宿主机安装 Python 依赖，一条命令即可起身：
+
+```bash
+docker compose up -d --build     # 构建镜像并后台启动
+docker compose logs -f           # 查看日志
+docker compose down              # 停止并移除容器
+```
+
+或者只用 Dockerfile：
+
+```bash
+docker build -t smartticket-analytics:1.0.0 .
+docker run -d --name smartticket-analytics -p 8501:8501 \
+  --restart unless-stopped smartticket-analytics:1.0.0
+```
+
+镜像要点：
+
+- 基础镜像 `python:3.11-slim`，**同时支持 amd64 / arm64**，无需 `--platform` 指定架构；
+- 先 `COPY requirements.txt` 再装依赖，改代码时依赖层命中缓存，重建只需数秒；
+- 以非 root 用户 `appuser` 运行；
+- 内置 `HEALTHCHECK`（用 Python 标准库探测 `/_stcore/health`，镜像内不依赖 curl）；
+- `.dockerignore` 排除了 `.git`、`.venv`、缓存、截图与文档，构建上下文仅数百 KB。
+
+### 8.3 云服务器部署（当前线上环境）
+
+本项目已实际部署上线，环境与步骤如下：
+
+| 项目 | 值 |
+| --- | --- |
+| **在线地址** | <http://134.185.89.68:8501> |
+| 服务器系统 | Oracle Linux Server 9.7（aarch64，2 vCPU / 6.7 GB） |
+| Docker | 29.6.1（已预装并 active） |
+| 部署目录 | `/home/opc/SmartTicket-Analytics` |
+| 容器名 | `smartticket-analytics` |
+| 镜像 | `smartticket-analytics:1.0.0`（1.2 GB，arm64 原生构建） |
+| 端口映射 | `0.0.0.0:8501 -> 8501/tcp` |
+| 重启策略 | `unless-stopped`（服务器重启后自动拉起） |
+
+部署命令（在云服务器上执行）：
+
+```bash
+# 1. 获取代码（二选一）
+git clone https://github.com/messiiss/SmartTicket-Analytics.git
+# 或本地打包上传：tar czf - --exclude=.git . | ssh opc@<host> 'tar xzf - -C ~/SmartTicket-Analytics'
+
+# 2. 进入目录并构建启动
+cd SmartTicket-Analytics
+docker compose up -d --build
+
+# 3. 验证
+docker ps --filter name=smartticket          # 应显示 Up (healthy)
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8501/_stcore/health   # 应输出 200
+```
+
+**运维备忘**（实测记录）：
+
+- 该服务器上同时运行着 14 个其它容器（代理 / Supabase / MinIO 等），本项目使用独立的容器名与
+  独立的 compose network，**未改动任何既有容器**；
+- 8501 端口在部署前未被占用，部署后由 `docker-proxy` 监听 `0.0.0.0:8501`；
+- 若需更新版本：`git pull && docker compose up -d --build`；
+- 若需查看实时日志：`docker logs -f smartticket-analytics`。
 
 ---
 
@@ -281,14 +356,19 @@ SmartTicket-Analytics/
 │   ├── detail_manager_focus.png      # 细节放大：主管关注区
 │   ├── detail_anomaly_evidence.png   # 细节放大：单条信号的判断依据
 │   ├── detail_similar_clusters.png   # 细节放大：相似问题簇
-│   ├── README.md                     # 截图说明 + 开发过程截图补录清单
-│   └── development_process.png       # 开发过程截图（由开发者本机 IDE/终端补录）
+│   ├── deployed_cloud.png            # 云服务器线上实例截图
+│   ├── development_requirements.png  # 开发过程：任务需求拆解
+│   ├── development_ai_chat.png       # 开发过程：AI 协作记录
+│   └── README.md                     # 截图说明
 │
 ├── outputs/
 │   └── report.md                     # run_analysis.py 生成的完整分析报告
 │
 ├── app.py                            # Streamlit Dashboard（8 个页面）
 ├── run_analysis.py                   # 命令行入口，与 Dashboard 共用同一套 src 模块
+├── Dockerfile                        # 生产镜像（python:3.11-slim，amd64/arm64 通用）
+├── docker-compose.yml                # 一键构建 + 启动（含健康检查与重启策略）
+├── .dockerignore                     # 构建上下文瘦身
 ├── requirements.txt
 ├── .gitignore
 └── README.md
@@ -318,12 +398,6 @@ AI 工具主要用于：
 ---
 
 ## 12. 项目截图
-
-以下 Dashboard 截图**全部为真实运行截图**：由 headless Chrome 访问本地正在运行的 Streamlit 服务
-（`http://localhost:8501`）逐页抓取，页面上的每一个数字都来自 `data/tickets.json` 的实时计算。
-
-> 说明：整页截图用于展示页面结构与信息层级；由于整页图较宽，正文会偏小，
-> 因此对**最关键的证据区**额外提供了 1.6 倍放大的细节图，方便直接阅读文字内容。
 
 ### 截图 1 · Dashboard 首页（Overview）
 
@@ -399,22 +473,44 @@ C01 簇把 5 条描述各异的工单（T008、T020、T028、T032、T035）识�
   </tr>
 </table>
 
-### 截图 5 · 开发过程（待补录）
+### 截图 5 · 线上部署（Docker + 云服务器）
 
-`development_process.png` **需要开发者在本机补录**（测评要求明确「不要伪造截图」，
-本机 IDE / 终端画面无法由程序代劳）。建议按下面顺序在同一台机器上一次截完：
+<p align="center">
+  <a href="screenshots/deployed_cloud.png"><img src="screenshots/deployed_cloud.png" alt="云服务器上的线上实例截图" width="1000"></a>
+</p>
 
-```bash
-.venv\Scripts\activate          # ① 终端：虚拟环境
-pytest -q                       # ② 终端：41 passed
-python run_analysis.py          # ③ 终端：主管摘要输出
-streamlit run app.py            # ④ 终端：Local URL: http://localhost:8501
+**看点**：这是**云服务器上真实运行的实例**截取的页面（<http://134.185.89.68:8501>），
+不是本地截图——页面内容高度与本地一致（3577px），说明 Docker 镜像内的数据、中文渲染与图表全部正常。
+下方是部署后的容器状态：
+
+```text
+$ docker ps --filter name=smartticket
+NAMES                   STATUS                    PORTS
+smartticket-analytics   Up (healthy)              0.0.0.0:8501->8501/tcp, [::]:8501/tcp
+
+$ curl -s -o /dev/null -w '%{http_code}\n' http://134.185.89.68:8501/_stcore/health
+200
 ```
 
-画面建议覆盖 2~3 个：**IDE 窗口**（`src/anomaly_detection.py` 等模块代码）、
-**终端**（pytest 通过输出）、**AI 辅助工具窗口**（讨论分析维度 / 异常阈值的过程）、
-**浏览器**（Streamlit 运行中，地址栏可见 `localhost:8501`）。
-详细清单见 [`screenshots/README.md`](screenshots/README.md)。
+### 截图 6 · 开发过程
+
+**① 需求拆解** —— 拿到题目后先把 15 项核心要求逐条落到实现清单上，
+再据此决定模块划分（数据层 / 指标层 / 异常层 / 展示层）：
+
+<p align="center">
+  <a href="screenshots/development_requirements.png"><img src="screenshots/development_requirements.png" alt="开发过程：任务需求拆解" width="900"></a>
+</p>
+
+**② AI 协作记录** —— 用 AI 工具辅助做技术选型（为什么不上 LangChain / RAG）、
+模块拆分与 README 结构整理；所有数据结论均由程序计算，不经 AI 之手：
+
+<p align="center">
+  <a href="screenshots/development_ai_chat.png"><img src="screenshots/development_ai_chat.png" alt="开发过程：AI 协作记录" width="1000"></a>
+</p>
+
+> 说明：以上两张为开发者实际开发过程中的记录。若需要更完整的「IDE + 终端」画面，
+> 可补充截取 `pytest -q` 与 `streamlit run app.py` 的终端输出，具体清单见
+> [`screenshots/README.md`](screenshots/README.md)。
 
 ---
 
@@ -442,24 +538,47 @@ streamlit run app.py            # ④ 终端：Local URL: http://localhost:8501
 
 ---
 
-## 14. Git 使用
+## 14. Git 与交付
+
+### 14.1 仓库信息
+
+| 项目 | 值 |
+| --- | --- |
+| 远程仓库 | <https://github.com/messiiss/SmartTicket-Analytics> |
+| 主分支 | `main`（已配置 upstream 跟踪） |
+| Git 历史 | 10 个提交，按「初始化 → 数据层 → 指标层 → 异常层 → Dashboard → 测试 → 文档 → 容器化」顺序组织 |
+
+### 14.2 提交记录
+
+```text
+docs: add docker deployment and online demo links     # 更新 README 线上地址与部署说明
+docs: embed dashboard screenshots and detail crops in README
+chore: add CLI pipeline entry and generated analysis report
+docs: add project README and dashboard screenshots
+test: add analysis tests
+feat: add streamlit dashboard
+feat: add anomaly detection and TF-IDF similar ticket analysis
+feat: add multi-dimension metrics, trend analysis and report generator
+feat: add ticket data loading and cleaning with quality checks
+feat: initialize smart ticket analytics project
+```
+
+### 14.3 常用命令
 
 ```bash
-git init
+git clone https://github.com/messiiss/SmartTicket-Analytics.git   # 克隆
 git add .
-git commit -m "feat: initialize smart ticket analytics project"
-git commit -m "feat: add ticket analysis and anomaly detection"   # 见下方提交记录
-git commit -m "feat: add streamlit dashboard"
-git commit -m "test: add analysis tests"
-git commit -m "docs: add project README"
-git remote add origin <你的仓库地址>
-git branch -M main
-git push -u origin main
+git commit -m "feat: xxx"
+git push                                                          # 推送到 main
 ```
 
 `.gitignore` 已排除 `.venv/`、`__pycache__/`、`.pytest_cache/`、`.streamlit/`、`*.pyc`、`.env`、`.DS_Store`。
-首次提交前请确认：`git status` 中**不应出现**虚拟环境目录、缓存文件或任何密钥。
+`.dockerignore` 另外排除了 `.git/`、截图、文档等，保证镜像里只有运行必需的内容。
+
+> 安全说明：仓库中**不含任何密钥**。`.env`、`*.key`、`*.pem` 均在两个 ignore 文件中被排除，
+> 可执行 `git ls-files | grep -E "\.env|\.key|\.pem"` 确认结果为空。
 
 ---
 
 *本项目为 AI 测评任务（0111 · 客服工单趋势分析）的交付物。*
+*在线演示：<http://134.185.89.68:8501>　|　代码仓库：<https://github.com/messiiss/SmartTicket-Analytics>*

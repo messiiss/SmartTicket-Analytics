@@ -1,8 +1,9 @@
 # 截图说明
 
-本目录下的 Dashboard 截图均为**真实运行截图**：由 headless Chrome 访问本地正在运行的
-Streamlit 服务（`http://localhost:8501`）逐页抓取，页面上的每一个数字都来自
-`data/tickets.json` 的实时计算。
+本目录下的 Dashboard 截图均为**真实运行截图**：由 headless Chrome 访问正在运行的
+Streamlit 服务逐页抓取，页面上的每一个数字都来自 `data/tickets.json` 的实时计算。
+
+## 页面整图
 
 | 文件 | 对应页面 | 展示内容 |
 | --- | --- | --- |
@@ -15,8 +16,8 @@ Streamlit 服务（`http://localhost:8501`）逐页抓取，页面上的每一�
 
 ## 细节放大图
 
-整页截图较宽，正文文字在 README 里会偏小。以下三张是对**最关键证据区**按 1.6 倍设备像素比
-单独裁切的放大图，嵌入 README 第 12 节，用于直接阅读文字内容：
+整页截图较宽（2240px），正文文字在 README 里会偏小。以下三张是对**最关键证据区**
+按 1.6 倍设备像素比单独裁切的放大图，嵌入 README 第 12 节，用于直接阅读文字内容：
 
 | 文件 | 裁切区域 | 为什么需要放大 |
 | --- | --- | --- |
@@ -24,30 +25,25 @@ Streamlit 服务（`http://localhost:8501`）逐页抓取，页面上的每一�
 | `detail_anomaly_evidence.png` | Anomaly 页第 1 条信号卡（【高】高优先级未解决） | 需要看清 `priority=高 且 is_resolved=false`、`7/8`、`120 小时` 等判定细节 |
 | `detail_similar_clusters.png` | Similar 页「相似问题簇」表 | 需要看清 C01 / C02 两个簇的工单编号与代表描述 |
 
-## 待补录：`development_process.png`
+## 线上部署与开发过程
 
-**这张截图无法由程序代劳，需要开发者在自己机器上补录**（要求明确写了「不要伪造截图」）。
-建议按下面的顺序操作，一台机器上就能截完：
+| 文件 | 说明 |
+| --- | --- |
+| `deployed_cloud.png` | **云服务器线上实例**（<http://134.185.89.68:8501>）的真实截图，用于证明 Docker 部署后数据、中文与图表全部正常 |
+| `development_requirements.png` | 开发过程①：拿到题目后拆解 15 项核心要求，映射为「数据层 / 指标层 / 异常层 / 展示层」四个模块 |
+| `development_ai_chat.png` | 开发过程②：AI 协作记录（技术选型讨论、模块拆分、README 结构整理） |
+
+## 可继续补充的画面（可选）
+
+如果希望「开发过程」这一项覆盖得更完整，可以再补 1~2 张本机画面：
 
 ```bash
-# 1. 激活环境（截一张终端窗口，能看到虚拟环境与命令）
-.venv\Scripts\activate
-
-# 2. 跑单元测试（截一张 pytest 输出的终端截图，要求能看到 41 passed）
-pytest -q
-
-# 3. 跑完整分析流水线（截一张终端截图，能看到主管摘要输出）
-python run_analysis.py
-
-# 4. 启动 Dashboard（截一张终端截图，能看到 Local URL: http://localhost:8501）
-streamlit run app.py
+.venv\Scripts\activate     # ① 终端：虚拟环境
+pytest -q                  # ② 终端：41 passed
+python run_analysis.py     # ③ 终端：主管摘要输出
+streamlit run app.py       # ④ 终端：Local URL: http://localhost:8501
+docker compose up -d       # ⑤ 终端：容器启动
 ```
 
-建议至少覆盖以下画面中的 2~3 个：
-
-- **IDE 窗口**：能看到 `src/` 下的模块（data_loader / data_cleaner / anomaly_detection / text_analysis）与代码内容；
-- **终端**：`pytest -q` 的 `41 passed`、`run_analysis.py` 的主管摘要输出；
-- **AI 辅助工具窗口**：与 AI 讨论分析维度、异常阈值、README 结构的对话界面；
-- **浏览器**：Streamlit 正在运行、地址栏显示 `localhost:8501`。
-
-截好后保存为 `screenshots/development_process.png`，README 第 12 节已预留引用位置。
+优先建议补：**IDE 窗口**（打开 `src/anomaly_detection.py`，能看到异常检测的判定逻辑）与
+**终端 pytest 输出**（能看到 `41 passed`）——这两张最能说明「代码是自己写的、测试是自己跑的」。
